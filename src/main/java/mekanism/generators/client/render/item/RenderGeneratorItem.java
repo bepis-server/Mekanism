@@ -36,7 +36,8 @@ public class RenderGeneratorItem extends SubTypeItemRenderer<GeneratorType> {
                 RenderHeatGeneratorItem.renderStack(stack, transformType);
             } else if (generatorType == GeneratorType.GAS_GENERATOR) {
                 RenderGasGeneratorItem.renderStack(stack, transformType);
-            } else if (generatorType == GeneratorType.WIND_GENERATOR) {
+            } else if (generatorType == GeneratorType.WIND_GENERATOR
+                       || generatorType == GeneratorType.ADVANCED_WIND_GENERATOR || generatorType == GeneratorType.ELITE_WIND_GENERATOR || generatorType == GeneratorType.ULTIMATE_WIND_GENERATOR) {
                 RenderWindGeneratorItem.renderStack(stack, transformType);
             }
         }

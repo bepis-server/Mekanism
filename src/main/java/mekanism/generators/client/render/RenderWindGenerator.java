@@ -23,7 +23,7 @@ public class RenderWindGenerator extends TileEntitySpecialRenderer<TileEntityWin
         if (tileEntity.getActive()) {
             angle = (tileEntity.getAngle() + ((tileEntity.getPos().getY() + 4F) / TileEntityWindGenerator.SPEED_SCALED) * partialTick) % 360;
         }
-        model.render(0.0625F, angle);
+        model.render(0.0625F, angle, tileEntity.getTier());
         GlStateManager.popMatrix();
     }
 }

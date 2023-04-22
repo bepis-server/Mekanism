@@ -1,0 +1,27 @@
+{
+  "result": {
+    "item": "mekanismgenerators:generator",
+    "data": 15
+  },
+  "pattern": [
+    "WWW",
+    "WCW",
+    "WWW"
+  ],
+  "type": "mekanism:ore_shaped",
+  "conditions": [
+    {
+      "type": "mekanism:recipe_enabled",
+      "generatorType": "WindGenerator"
+    }
+  ],
+  "key": {
+    "W": {
+      "item": "mekanismgenerators:generator",
+      "data": 14
+    },
+    "C": {
+      "item": "#CIRCUITELITE"
+    }
+  }
+}

@@ -209,7 +209,7 @@ public abstract class BlockGenerator extends BlockMekanismContainer {
     @Override
     public void getSubBlocks(CreativeTabs creativetabs, NonNullList<ItemStack> list) {
         for (GeneratorType type : GeneratorType.values()) {
-            if (type.isEnabled()) {
+            if (type.isEnabled() && type.blockType.getBlock() == this) {
                 list.add(new ItemStack(this, 1, type.meta));
             }
         }
@@ -302,7 +302,7 @@ public abstract class BlockGenerator extends BlockMekanismContainer {
             return true;
         }
         TileEntityBasicBlock tileEntity = (TileEntityBasicBlock) world.getTileEntity(pos);
-        int metadata = state.getBlock().getMetaFromState(state);
+        BlockStateGenerator.GeneratorType type = BlockStateGenerator.GeneratorType.get(state);
         ItemStack stack = entityplayer.getHeldItem(hand);
 
         if (!stack.isEmpty()) {
@@ -328,11 +328,11 @@ public abstract class BlockGenerator extends BlockMekanismContainer {
             }
         }
 
-        if (metadata == GeneratorType.TURBINE_CASING.meta || metadata == GeneratorType.TURBINE_VALVE.meta || metadata == GeneratorType.TURBINE_VENT.meta) {
+        if (type == GeneratorType.TURBINE_CASING || type == GeneratorType.TURBINE_VALVE || type == GeneratorType.TURBINE_VENT) {
             return ((IMultiblock<?>) tileEntity).onActivate(entityplayer, hand, stack);
         }
 
-        if (metadata == GeneratorType.TURBINE_ROTOR.meta) {
+        if (type == GeneratorType.TURBINE_ROTOR) {
             TileEntityTurbineRotor rod = (TileEntityTurbineRotor) tileEntity;
             if (!entityplayer.isSneaking()) {
                 if (!stack.isEmpty() && stack.getItem() == GeneratorsItems.TurbineBlade) {
@@ -366,7 +366,7 @@ public abstract class BlockGenerator extends BlockMekanismContainer {
             return true;
         }
 
-        int guiId = GeneratorType.get(getGeneratorBlock(), metadata).guiId;
+        int guiId = type.guiId;
 
         if (guiId != -1 && tileEntity != null) {
             if (!entityplayer.isSneaking()) {
@@ -420,6 +420,9 @@ public abstract class BlockGenerator extends BlockMekanismContainer {
                     return BlockFaceShape.UNDEFINED;
                 case ADVANCED_SOLAR_GENERATOR:
                 case WIND_GENERATOR:
+                case ADVANCED_WIND_GENERATOR:
+                case ELITE_WIND_GENERATOR:
+                case ULTIMATE_WIND_GENERATOR:
                     return face == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
                 case TURBINE_ROTOR:
                     return face != EnumFacing.UP && face != EnumFacing.DOWN ? BlockFaceShape.MIDDLE_POLE : BlockFaceShape.CENTER;
@@ -460,7 +463,7 @@ public abstract class BlockGenerator extends BlockMekanismContainer {
     @Override
     protected ItemStack getDropItem(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
         TileEntityBasicBlock tileEntity = (TileEntityBasicBlock) world.getTileEntity(pos);
-        ItemStack itemStack = new ItemStack(GeneratorsBlocks.Generator, 1, state.getBlock().getMetaFromState(state));
+        ItemStack itemStack = new ItemStack(GeneratorType.get(state).blockType.getBlock(), 1, state.getBlock().getMetaFromState(state));
 
         if (itemStack.getTagCompound() == null && !(tileEntity instanceof TileEntityMultiblock)) {
             itemStack.setTagCompound(new NBTTagCompound());
@@ -502,7 +505,8 @@ public abstract class BlockGenerator extends BlockMekanismContainer {
     @Deprecated
     public boolean isSideSolid(IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, EnumFacing side) {
         GeneratorType type = GeneratorType.get(getGeneratorBlock(), state.getBlock().getMetaFromState(state));
-        return type != GeneratorType.SOLAR_GENERATOR && type != GeneratorType.ADVANCED_SOLAR_GENERATOR && type != GeneratorType.WIND_GENERATOR && type != GeneratorType.TURBINE_ROTOR;
+        return type != GeneratorType.SOLAR_GENERATOR && type != GeneratorType.ADVANCED_SOLAR_GENERATOR && type != GeneratorType.WIND_GENERATOR && type != GeneratorType.TURBINE_ROTOR
+                    && type != GeneratorType.ADVANCED_WIND_GENERATOR && type != GeneratorType.ELITE_WIND_GENERATOR && type != GeneratorType.ULTIMATE_WIND_GENERATOR;
 
     }
 

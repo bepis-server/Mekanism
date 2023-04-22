@@ -10,6 +10,7 @@ import mekanism.common.base.IBlockType;
 import mekanism.common.block.states.BlockStateFacing;
 import mekanism.common.block.states.BlockStateUtils;
 import mekanism.common.config.MekanismConfig;
+import mekanism.common.tier.BaseTier;
 import mekanism.common.util.LangUtils;
 import mekanism.generators.common.GeneratorsBlocks;
 import mekanism.generators.common.MekanismGenerators;
@@ -52,7 +53,8 @@ public class BlockStateGenerator extends ExtendedBlockState {
     }
 
     public enum GeneratorBlock {
-        GENERATOR_BLOCK_1;
+        GENERATOR_BLOCK_1,
+        GENERATOR_BLOCK_2;
 
         PropertyEnum<GeneratorType> generatorTypeProperty;
 
@@ -64,8 +66,11 @@ public class BlockStateGenerator extends ExtendedBlockState {
         }
 
         public Block getBlock() {
-            if (this == GeneratorBlock.GENERATOR_BLOCK_1) {
-                return GeneratorsBlocks.Generator;
+            switch (this) {
+                case GENERATOR_BLOCK_1:
+                    return GeneratorsBlocks.Generator;
+                case GENERATOR_BLOCK_2:
+                    return GeneratorsBlocks.Generator2;
             }
             return null;
         }
@@ -84,7 +89,11 @@ public class BlockStateGenerator extends ExtendedBlockState {
         TURBINE_CASING(GeneratorBlock.GENERATOR_BLOCK_1, 10, "TurbineCasing", -1, -1, TileEntityTurbineCasing::new, false, BlockStateUtils.NO_ROTATION, false),
         TURBINE_VALVE(GeneratorBlock.GENERATOR_BLOCK_1, 11, "TurbineValve", -1, -1, TileEntityTurbineValve::new, false, BlockStateUtils.NO_ROTATION, false, true),
         TURBINE_VENT(GeneratorBlock.GENERATOR_BLOCK_1, 12, "TurbineVent", -1, -1, TileEntityTurbineVent::new, false, BlockStateUtils.NO_ROTATION, false),
-        SATURATING_CONDENSER(GeneratorBlock.GENERATOR_BLOCK_1, 13, "SaturatingCondenser", -1, -1, TileEntitySaturatingCondenser::new, false, BlockStateUtils.NO_ROTATION, false);
+        SATURATING_CONDENSER(GeneratorBlock.GENERATOR_BLOCK_1, 13, "SaturatingCondenser", -1, -1, TileEntitySaturatingCondenser::new, false, BlockStateUtils.NO_ROTATION, false),
+        ADVANCED_WIND_GENERATOR(GeneratorBlock.GENERATOR_BLOCK_1, 14, "AdvancedWindGenerator", 5, WIND_GENERATOR.maxEnergy * TileEntityWindGenerator.getGenerationMultiplierForTier(BaseTier.ADVANCED), TileEntityWindGenerator::new, true, Plane.HORIZONTAL, false),
+        ELITE_WIND_GENERATOR(GeneratorBlock.GENERATOR_BLOCK_1, 15, "EliteWindGenerator", 5, WIND_GENERATOR.maxEnergy * TileEntityWindGenerator.getGenerationMultiplierForTier(BaseTier.ELITE), TileEntityWindGenerator::new, true, Plane.HORIZONTAL, false),
+        ULTIMATE_WIND_GENERATOR(GeneratorBlock.GENERATOR_BLOCK_2, 0, "UltimateWindGenerator", 5, WIND_GENERATOR.maxEnergy * TileEntityWindGenerator.getGenerationMultiplierForTier(BaseTier.ULTIMATE), TileEntityWindGenerator::new, true, Plane.HORIZONTAL, false),
+        ;
 
         private static final List<GeneratorType> GENERATORS_FOR_CONFIG;
 
@@ -166,7 +175,13 @@ public class BlockStateGenerator extends ExtendedBlockState {
 
         @Override
         public boolean isEnabled() {
-            if (meta > WIND_GENERATOR.meta) {
+            if (this.ordinal() > WIND_GENERATOR.ordinal()) {
+                switch (this) {
+                    case ADVANCED_WIND_GENERATOR:
+                    case ELITE_WIND_GENERATOR:
+                    case ULTIMATE_WIND_GENERATOR:
+                        return WIND_GENERATOR.isEnabled();
+                }
                 return true;
             }
             return MekanismConfig.current().generators.generatorsManager.isEnabled(this);
@@ -186,7 +201,7 @@ public class BlockStateGenerator extends ExtendedBlockState {
         }
 
         public ItemStack getStack() {
-            return new ItemStack(GeneratorsBlocks.Generator, 1, meta);
+            return new ItemStack(this.blockType.getBlock(), 1, meta);
         }
 
         public boolean canRotateTo(EnumFacing side) {

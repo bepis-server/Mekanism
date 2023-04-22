@@ -44,6 +44,7 @@ import mekanism.generators.common.tile.turbine.TileEntityTurbineCasing;
 import mekanism.generators.common.tile.turbine.TileEntityTurbineRotor;
 import mekanism.generators.common.tile.turbine.TileEntityTurbineValve;
 import mekanism.generators.common.tile.turbine.TileEntityTurbineVent;
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -91,12 +92,17 @@ public class GeneratorsClientProxy extends GeneratorsCommonProxy {
         registerItemRender(GeneratorsItems.Hohlraum);
         registerItemRender(GeneratorsItems.TurbineBlade);
 
-        Item.getItemFromBlock(GeneratorsBlocks.Generator).setTileEntityItemStackRenderer(new RenderGeneratorItem());
+        RenderGeneratorItem renderGeneratorItem = new RenderGeneratorItem();
+        for (Block block : GeneratorsBlocks.allGeneratorBlocks()) {
+            Item.getItemFromBlock(block).setTileEntityItemStackRenderer(renderGeneratorItem);
+        }
     }
 
     @Override
     public void registerBlockRenders() {
-        ModelLoader.setCustomStateMapper(GeneratorsBlocks.Generator, generatorMapper);
+        for (Block block : GeneratorsBlocks.allGeneratorBlocks()) {
+            ModelLoader.setCustomStateMapper(block, generatorMapper);
+        }
         ModelLoader.setCustomStateMapper(GeneratorsBlocks.Reactor, reactorMapper);
         ModelLoader.setCustomStateMapper(GeneratorsBlocks.ReactorGlass, reactorMapper);
 
@@ -122,6 +128,9 @@ public class GeneratorsClientProxy extends GeneratorsCommonProxy {
         generatorModelBake(modelRegistry, GeneratorType.WIND_GENERATOR);
         generatorModelBake(modelRegistry, GeneratorType.GAS_GENERATOR);
         generatorModelBake(modelRegistry, GeneratorType.ADVANCED_SOLAR_GENERATOR);
+        generatorModelBake(modelRegistry, GeneratorType.ADVANCED_WIND_GENERATOR);
+        generatorModelBake(modelRegistry, GeneratorType.ELITE_WIND_GENERATOR);
+        generatorModelBake(modelRegistry, GeneratorType.ULTIMATE_WIND_GENERATOR);
     }
 
     private void generatorModelBake(IRegistry<ModelResourceLocation, IBakedModel> modelRegistry, GeneratorType type) {

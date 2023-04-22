@@ -2,15 +2,23 @@ package mekanism.generators.common.tile;
 
 import io.netty.buffer.ByteBuf;
 import javax.annotation.Nonnull;
+
 import mekanism.api.Coord4D;
 import mekanism.api.TileNetworkList;
 import mekanism.common.base.IBoundingBlock;
 import mekanism.common.config.MekanismConfig;
+import mekanism.common.tier.BaseTier;
 import mekanism.common.util.ChargeUtils;
+import mekanism.common.util.LangUtils;
 import mekanism.common.util.MekanismUtils;
+import mekanism.generators.common.block.states.BlockStateGenerator;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class TileEntityWindGenerator extends TileEntityGenerator implements IBoundingBlock {
 
@@ -20,6 +28,12 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
     public static final float SPEED_SCALED = 256F / SPEED;
     static final String[] methods = new String[]{"getEnergy", "getOutput", "getMaxEnergy", "getEnergyNeeded", "getMultiplier"};
 
+    public static int getGenerationMultiplierForTier(BaseTier tier) {
+        return 1 << (tier.ordinal() * 3);
+    }
+
+    private BaseTier tier;
+
     private double angle;
     private float currentMultiplier;
     private boolean isBlacklistDimension = false;
@@ -27,6 +41,23 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
     public TileEntityWindGenerator() {
         super("wind", "WindGenerator", 200000, MekanismConfig.current().generators.windGenerationMax.val() * 2);
         inventory = NonNullList.withSize(SLOTS.length, ItemStack.EMPTY);
+        tier = BaseTier.BASIC;
+    }
+
+    public TileEntityWindGenerator(BaseTier tier) {
+        this();
+    }
+
+    private void setTier(BaseTier tier) {
+        this.tier = tier;
+        this.output = MekanismConfig.current().generators.windGenerationMax.val() * 2 * getGenerationMultiplierForTier(tier);
+        this.BASE_MAX_ENERGY = 200000 * getGenerationMultiplierForTier(tier);
+        this.maxEnergy = this.BASE_MAX_ENERGY;
+        this.setEnergy(Math.min(this.getEnergy(), this.getMaxEnergy()));
+    }
+
+    public BaseTier getTier() {
+        return this.tier;
     }
 
     @Override
@@ -40,6 +71,59 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
         if (isBlacklistDimension) {
             setActive(false);
         }
+
+        this.determineTier();
+    }
+
+    @Override
+    public void onAdded() {
+        super.onAdded();
+
+        this.determineTier();
+    }
+
+    public static BaseTier getTierForGeneratorType(BlockStateGenerator.GeneratorType type) {
+        switch (type) {
+            case WIND_GENERATOR:
+                return BaseTier.BASIC;
+            case ADVANCED_WIND_GENERATOR:
+                return BaseTier.ADVANCED;
+            case ELITE_WIND_GENERATOR:
+                return BaseTier.ELITE;
+            case ULTIMATE_WIND_GENERATOR:
+                return BaseTier.ULTIMATE;
+            default:
+                throw new IllegalArgumentException(Objects.toString(type));
+        }
+    }
+
+    public static BlockStateGenerator.GeneratorType getGeneratorTypeForTier(BaseTier tier) {
+        switch (tier) {
+            case BASIC:
+                return BlockStateGenerator.GeneratorType.WIND_GENERATOR;
+            case ADVANCED:
+                return BlockStateGenerator.GeneratorType.ADVANCED_WIND_GENERATOR;
+            case ELITE:
+                return BlockStateGenerator.GeneratorType.ELITE_WIND_GENERATOR;
+            case ULTIMATE:
+                return BlockStateGenerator.GeneratorType.ULTIMATE_WIND_GENERATOR;
+            default:
+                throw new IllegalArgumentException(Objects.toString(tier));
+        }
+    }
+
+    private void determineTier() {
+        IBlockState state = this.world.getBlockState(this.getPos());
+        BlockStateGenerator.GeneratorType type = BlockStateGenerator.GeneratorType.get(state);
+        this.setTier(getTierForGeneratorType(type));
+    }
+
+    @NotNull
+    @Override
+    public String getName() {
+        IBlockState state = this.world.getBlockState(this.getPos());
+        BlockStateGenerator.GeneratorType type = BlockStateGenerator.GeneratorType.get(state);
+        return LangUtils.localize(this.getBlockType().getTranslationKey() + '.' + type.getBlockName() + ".name");
     }
 
     @Override
@@ -96,7 +180,7 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
             final float intercept = minG - slope * minY;
             final float clampedY = Math.min(maxY, Math.max(minY, (float) (getPos().getY() + 4)));
             final float toGen = slope * clampedY + intercept;
-            return toGen / minG;
+            return toGen / minG * getGenerationMultiplierForTier(this.tier);
         }
         return 0;
     }

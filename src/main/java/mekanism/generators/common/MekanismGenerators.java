@@ -20,6 +20,7 @@ import mekanism.common.multiblock.MultiblockManager;
 import mekanism.common.network.PacketSimpleGui;
 import mekanism.common.recipe.RecipeHandler;
 import mekanism.common.util.StackUtils;
+import mekanism.generators.common.block.states.BlockStateGenerator;
 import mekanism.generators.common.content.turbine.SynchronizedTurbineData;
 import mekanism.generators.common.fixers.GeneratorTEFixer;
 import net.minecraft.block.Block;
@@ -179,5 +180,8 @@ public class MekanismGenerators implements IModule {
         // Mekanism Generators multiblock structures
         MekanismAPI.addBoxBlacklist(GeneratorsBlocks.Generator, 5); // Advanced Solar Generator
         MekanismAPI.addBoxBlacklist(GeneratorsBlocks.Generator, 6); // Wind Generator
+        MekanismAPI.addBoxBlacklist(BlockStateGenerator.GeneratorType.ADVANCED_WIND_GENERATOR.blockType.getBlock(), BlockStateGenerator.GeneratorType.ADVANCED_WIND_GENERATOR.meta); // AdvancedWind Generator
+        MekanismAPI.addBoxBlacklist(BlockStateGenerator.GeneratorType.ELITE_WIND_GENERATOR.blockType.getBlock(), BlockStateGenerator.GeneratorType.ELITE_WIND_GENERATOR.meta); // EliteWind Generator
+        MekanismAPI.addBoxBlacklist(BlockStateGenerator.GeneratorType.ULTIMATE_WIND_GENERATOR.blockType.getBlock(), BlockStateGenerator.GeneratorType.ULTIMATE_WIND_GENERATOR.meta); // UltimateWind Generator
     }
 }

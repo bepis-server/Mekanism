@@ -1,5 +1,6 @@
 package mekanism.generators.client.model;
 
+import mekanism.common.tier.BaseTier;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 
@@ -8,7 +9,7 @@ public class ModelWindGenerator extends ModelBase {
     ModelRenderer head;
     ModelRenderer plateConnector2;
     ModelRenderer plateConnector;
-    ModelRenderer plate;
+    ModelRenderer[] plate = new ModelRenderer[BaseTier.values().length];
     ModelRenderer bladeCap;
     ModelRenderer bladeCenter;
     ModelRenderer baseRim;
@@ -49,12 +50,31 @@ public class ModelWindGenerator extends ModelBase {
         plateConnector.setTextureSize(128, 128);
         plateConnector.mirror = true;
         setRotation(plateConnector, 0F, 0F, 0F);
-        plate = new ModelRenderer(this, 42, 25);
-        plate.addBox(0F, 0F, 0F, 8, 8, 1);
-        plate.setRotationPoint(-4F, 12F, -8F);
-        plate.setTextureSize(128, 128);
-        plate.mirror = true;
-        setRotation(plate, 0F, 0F, 0F);
+        plate[BaseTier.BASIC.ordinal()] = new ModelRenderer(this, 42, 25);
+        plate[BaseTier.BASIC.ordinal()].addBox(0F, 0F, 0F, 8, 8, 1);
+        plate[BaseTier.BASIC.ordinal()].setRotationPoint(-4F, 12F, -8F);
+        plate[BaseTier.BASIC.ordinal()].setTextureSize(128, 128);
+        plate[BaseTier.BASIC.ordinal()].mirror = true;
+        setRotation(plate[BaseTier.BASIC.ordinal()], 0F, 0F, 0F);
+        plate[BaseTier.ADVANCED.ordinal()] = new ModelRenderer(this, 53, 0);
+        plate[BaseTier.ADVANCED.ordinal()].addBox(0F, 0F, 0F, 8, 8, 1);
+        plate[BaseTier.ADVANCED.ordinal()].setRotationPoint(-4F, 12F, -8F);
+        plate[BaseTier.ADVANCED.ordinal()].setTextureSize(128, 128);
+        plate[BaseTier.ADVANCED.ordinal()].mirror = true;
+        setRotation(plate[BaseTier.ADVANCED.ordinal()], 0F, 0F, 0F);
+        plate[BaseTier.ELITE.ordinal()] = new ModelRenderer(this, 53, 9);
+        plate[BaseTier.ELITE.ordinal()].addBox(0F, 0F, 0F, 8, 8, 1);
+        plate[BaseTier.ELITE.ordinal()].setRotationPoint(-4F, 12F, -8F);
+        plate[BaseTier.ELITE.ordinal()].setTextureSize(128, 128);
+        plate[BaseTier.ELITE.ordinal()].mirror = true;
+        setRotation(plate[BaseTier.ELITE.ordinal()], 0F, 0F, 0F);
+        plate[BaseTier.ULTIMATE.ordinal()] = new ModelRenderer(this, 60, 18);
+        plate[BaseTier.ULTIMATE.ordinal()].addBox(0F, 0F, 0F, 8, 8, 1);
+        plate[BaseTier.ULTIMATE.ordinal()].setRotationPoint(-4F, 12F, -8F);
+        plate[BaseTier.ULTIMATE.ordinal()].setTextureSize(128, 128);
+        plate[BaseTier.ULTIMATE.ordinal()].mirror = true;
+        setRotation(plate[BaseTier.ULTIMATE.ordinal()], 0F, 0F, 0F);
+
         bladeCap = new ModelRenderer(this, 22, 0);
         bladeCap.addBox(-1F, -1F, -8F, 2, 2, 1);
         bladeCap.setRotationPoint(0F, -48F, 0F);
@@ -159,11 +179,11 @@ public class ModelWindGenerator extends ModelBase {
         setRotation(post1d, -0.0347321F, 0F, -0.0347321F);
     }
 
-    public void render(float size, double angle) {
+    public void render(float size, double angle, BaseTier tier) {
         head.render(size);
         plateConnector2.render(size);
         plateConnector.render(size);
-        plate.render(size);
+        plate[tier.ordinal()].render(size);
         baseRim.render(size);
         base.render(size);
         wire.render(size);
@@ -174,27 +194,31 @@ public class ModelWindGenerator extends ModelBase {
         post1c.render(size);
         post1d.render(size);
 
-        setRotation(blade1a, 0F, 0F, getRotation(getAbsoluteAngle(angle)));
-        setRotation(blade1b, 0F, 0F, 0.0349066F + getRotation(getAbsoluteAngle(angle)));
-
-        setRotation(blade2a, 0F, 0F, getRotation(getAbsoluteAngle(angle - 60)));
-        setRotation(blade2b, 0F, 0F, 0.0349066F + getRotation(getAbsoluteAngle(angle - 60)));
-
-        setRotation(blade3a, 0F, 0F, getRotation(getAbsoluteAngle(angle + 60)));
-        setRotation(blade3b, 0F, 0F, 0.0349066F + getRotation(getAbsoluteAngle(angle + 60)));
-
         setRotation(bladeCap, 0F, 0F, getRotation(getAbsoluteAngle(angle)));
         setRotation(bladeCenter, 0F, 0F, getRotation(getAbsoluteAngle(angle)));
-
-        blade1a.render(size);
-        blade2a.render(size);
-        blade3a.render(size);
-        blade1b.render(size);
-        blade2b.render(size);
-        blade3b.render(size);
-
         bladeCap.render(size);
         bladeCenter.render(size);
+
+        int bladesInstances = tier.ordinal() + 1;
+        double bladesAngleOffset = (360.0d / 3) / bladesInstances;
+
+        for (int i = 0; i < bladesInstances; i++, angle += bladesAngleOffset){
+            setRotation(blade1a, 0F, 0F, getRotation(getAbsoluteAngle(angle)));
+            setRotation(blade1b, 0F, 0F, 0.0349066F + getRotation(getAbsoluteAngle(angle)));
+
+            setRotation(blade2a, 0F, 0F, getRotation(getAbsoluteAngle(angle - 60)));
+            setRotation(blade2b, 0F, 0F, 0.0349066F + getRotation(getAbsoluteAngle(angle - 60)));
+
+            setRotation(blade3a, 0F, 0F, getRotation(getAbsoluteAngle(angle + 60)));
+            setRotation(blade3b, 0F, 0F, 0.0349066F + getRotation(getAbsoluteAngle(angle + 60)));
+
+            blade1a.render(size);
+            blade2a.render(size);
+            blade3a.render(size);
+            blade1b.render(size);
+            blade2b.render(size);
+            blade3b.render(size);
+        }
     }
 
     public float getRotation(double angle) {

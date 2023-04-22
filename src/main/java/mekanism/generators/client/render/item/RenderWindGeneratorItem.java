@@ -5,6 +5,8 @@ import mekanism.client.render.MekanismRenderer;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.generators.client.model.ModelWindGenerator;
+import mekanism.generators.common.block.states.BlockStateGenerator;
+import mekanism.generators.common.tile.TileEntityWindGenerator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
@@ -51,7 +53,7 @@ public class RenderWindGeneratorItem {
             angle = (angle + 2) % 360;
             lastTicksUpdated = Minecraft.getMinecraft().getRenderPartialTicks();
         }
-        windGenerator.render(0.016F, angle);
+        windGenerator.render(0.016F, angle, TileEntityWindGenerator.getTierForGeneratorType(BlockStateGenerator.GeneratorType.get(stack)));
         GlStateManager.popMatrix();
     }
 }
